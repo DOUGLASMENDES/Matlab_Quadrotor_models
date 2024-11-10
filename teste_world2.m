@@ -1,0 +1,1 @@
+openExample('sl3d/BuildActorFrom3DGraphicUsingMATLABExample')
