@@ -110,7 +110,7 @@ def plot_labirinto(rodada_voo):
     # Plotar o caminho do drone
     x_vals, y_vals, z_vals = zip(*[pos for pos, _ in rodada_voo.caminho])
     ax.plot(x_vals, y_vals, z_vals, color="blue", linewidth=2, label="Caminho do Drone")
-    ax.scatter(x_vals[-1], y_vals[-1], z_vals[-1], color="yellow", s=100, label="Drone")
+    ax.scatter(x_vals[-1], y_vals[-1], z_vals[-1], color="blue", s=100, label="Drone")
 
     # Configurações do gráfico
     ax.set_xlabel('X')

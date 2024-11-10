@@ -44,3 +44,5 @@ No contexto de aprendizado por reforço (Reinforcement Learning), as variáveis 
 - `epsilon`: Balanceia entre explorar ações desconhecidas e explorar o conhecimento atual.
 
 Esses três parâmetros são fundamentais para ajustar o comportamento do agente e garantir que ele consiga aprender de forma eficiente no ambiente em que está inserido.
+
+![Imagem_rl](figures/drone_rl_best_episode.png)
