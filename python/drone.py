@@ -178,39 +178,17 @@ def treinar_ql(rodadas, posicao_inicial):
         print(f"Rodada: {rodada}, Epsilon: {epsilon:.2f}, Custo: {custo}")
 
 # Executa o treinamento (encontra o melhor caminho)
-#posicao_inicial = (0, 0, 0)
-#treinar_ql(max_rodadas, posicao_inicial)
-
-#rodada_menor_custo = obtem_rodada_menor_custo(todas_rodadas)
-
-#print(f"Rodada com menor custo: {rodada_menor_custo.rodada}")
-#print("Comandos:")
-#obtem_comandos(rodada_menor_custo.caminho)
-#print("Caminho:")
-#print(rodada_menor_custo.caminho)
-
-#plot_labirinto(rodada_menor_custo)
-
-
-########################################################################
-from drone_dqn_new import obtem_comandos, obtem_rodada_maior_recompensa, plot_labirinto_dqn
-
-# Iniciar o treinamento
 posicao_inicial = (0, 0, 0)
-treinar_dqn(max_episodios, posicao_inicial)
+treinar_ql(max_rodadas, posicao_inicial)
 
+rodada_menor_custo = obtem_rodada_menor_custo(todas_rodadas)
 
-rodada_maior_recompensa = obtem_rodada_maior_recompensa(todas_rodadas)
-
+print(f"Rodada com menor custo: {rodada_menor_custo.rodada}")
 print("Comandos:")
-obtem_comandos(rodada_maior_recompensa.caminho)
+obtem_comandos(rodada_menor_custo.caminho)
 print("Caminho:")
-print(rodada_maior_recompensa.caminho)
-print(f"Rodada com maior recompensa: { \
-            rodada_maior_recompensa.rodada}, Recompensa: { \
-            rodada_maior_recompensa.recompensa}")
+print(rodada_menor_custo.caminho)
 
-
-plot_labirinto(rodada_maior_recompensa)
+plot_labirinto(rodada_menor_custo)
 
 print("FIM")

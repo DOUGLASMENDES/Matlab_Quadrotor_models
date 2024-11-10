@@ -1,6 +1,5 @@
 import numpy as np
 import random
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -42,36 +41,8 @@ labirinto = np.array([
     ]
 ])
 
-labirinto = np.array([
-    [   # cada vetor representa o plano x,z
-        [1, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1],
-        [1, 1, 0, 1, 1]
-    ],
-    [
-        [1, 0, 1, 1, 1],
-        [1, 1, 0, 1, 1],
-        [0, 1, 1, 1, 1]
-    ],
-    [
-        [1, 0, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 1]
-    ],
-    [
-        [1, 0, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [0, 1, 1, 1, 1]
-    ],
-    [
-        [1, 1, 1, 1, 1],
-        [1, 0, 1, 1, 1],
-        [1, 1, 1, 1, 2]
-    ]
-])
-
 # Parâmetros DQN
-max_episodios = 10
+max_tentativas = 500
 gamma = 0.95
 alpha = 0.001
 epsilon = 1.0
@@ -96,7 +67,7 @@ class DQN(nn.Module):
         x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
-# Inicializar a rede e otimizador
+# Inicializa a rede e otimizador
 state_size = 3  # Coordenadas x, y, z como estado
 action_size = 6  # Número de ações possíveis
 policy_net = DQN(state_size, action_size)
@@ -107,20 +78,22 @@ loss_fn = nn.MSELoss()
 actions = [(0, 0, 1), (0, 0, -1), 
            (0, 1, 0), (0, -1, 0), 
            (1, 0, 0), (-1, 0, 0)]
-todas_rodadas = []
 
 # Funções para o ambiente
 def obter_recompensa(pos):
-    if labirinto[pos] == 2:
+    if labirinto[pos] == 2:     # chegou no destino
         return 100
-    elif labirinto[pos] == 0:
+    elif labirinto[pos] == 0:   # bateu em obstáculo
         return -100
     else:
         return -1
 
 def posicao_valida(pos):
     x, y, z = pos
-    return 0 <= x < labirinto.shape[0] and 0 <= y < labirinto.shape[1] and 0 <= z < labirinto.shape[2] and labirinto[pos] != 0
+    return 0 <= x < labirinto.shape[0] and \
+        0 <= y < labirinto.shape[1] and \
+        0 <= z < labirinto.shape[2] and \
+        labirinto[pos] != 0
 
 def atualizar_posicao(pos, action):
     x, y, z = pos
@@ -128,12 +101,8 @@ def atualizar_posicao(pos, action):
     nova_pos = (x + dx, y + dy, z + dz)
     return nova_pos if posicao_valida(nova_pos) else pos
 
-def obtem_comandos(cam):
-    for c in cam:
-        print(actions[c[1]])
-
 # Função para plotar o labirinto e o drone
-def plot_labirinto_dqn(rodada_voo):
+def plot_labirinto(rodada_voo):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
@@ -161,30 +130,18 @@ def plot_labirinto_dqn(rodada_voo):
     plt.show()    
     
 class Rodada:
-    def __init__(self, cam, epi, eps, cus, rec):
+    def __init__(self, cam, epi, eps, cus):
         self.caminho = cam
         self.rodada = epi
         self.epsilon = eps
         self.custo = cus
-        self.recompensa = rec
-
-def obtem_rodada_maior_recompensa(rodadas):
-    maior = 0
-    for rodada in rodadas:
-        if rodada.recompensa > maior:
-            maior = rodada.recompensa
-            rodada_maior_recompensa = rodada
-    return rodada_maior_recompensa
 
 # Função de treinamento do DQN
 def treinar_dqn(episodios, posicao_inicial):
     global epsilon
-    global custo
     for episodio in range(episodios):
         pos = posicao_inicial
         total_reward = 0
-        caminho = []
-        custo = 0
         
         while True:
             state = torch.tensor(pos, dtype=torch.float32)
@@ -199,12 +156,10 @@ def treinar_dqn(episodios, posicao_inicial):
             recompensa = obter_recompensa(nova_pos)
             total_reward += recompensa
             done = recompensa == 100 or recompensa == -100
-            custo = custo + 1
-                        
-            # Adicionar a transição ao replay buffer
-            experience_replay.append((pos, action, recompensa, nova_pos, done))
-            caminho.append((pos, action))
             
+            experience_replay.append((pos, action, recompensa, nova_pos, done))
+            
+            # Atualizar posição
             pos = nova_pos
             
             # Treinamento com replay de experiência
@@ -230,13 +185,6 @@ def treinar_dqn(episodios, posicao_inicial):
             if done:
                 break
 
-        esta_rodada = Rodada(caminho, episodio, epsilon, custo, recompensa)
-        todas_rodadas.append(esta_rodada)
-
-        # Plotar o ambiente e o caminho do drone após cada episódio
-        #plot_labirinto(caminho, episodio+1)
-        #plot_labirinto(esta_rodada)
-        
         # Decaimento de epsilon
         epsilon = max(min_epsilon, epsilon * decay_rate)
         
@@ -244,20 +192,6 @@ def treinar_dqn(episodios, posicao_inicial):
 
 # Iniciar o treinamento
 posicao_inicial = (0, 0, 0)
-treinar_dqn(max_episodios, posicao_inicial)
-
-
-rodada_maior_recompensa = obtem_rodada_maior_recompensa(todas_rodadas)
-
-print("Comandos:")
-obtem_comandos(rodada_maior_recompensa.caminho)
-print("Caminho:")
-print(rodada_maior_recompensa.caminho)
-print(f"Rodada com maior recompensa: { \
-            rodada_maior_recompensa.rodada}, Recompensa: { \
-            rodada_maior_recompensa.recompensa}")
-
-
-plot_labirinto_dqn(rodada_maior_recompensa)
+treinar_dqn(max_tentativas, posicao_inicial)
 
 print("FIM")
