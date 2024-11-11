@@ -19,7 +19,7 @@ O modelo implementado é o seguinte:
 onde ${\xi}=(x,y,z)$ representa a posição do veículo no referencial inercial e ${v}=(v_x,v_y,v_z)$ representa a velocidade translacional. O vetor ${\omega}=(p,q,r)$ é a velocidade angular e ${\eta}=(\phi, \theta, \psi)$ são os ângulos de Euler.
 
 
-## Aprendizado por Reforço para encontrar melhor tragetória do drone até um objetivo (python)
+## Aprendizado por Reforço para encontrar melhor trajetória do drone até um objetivo (python)
 
 No contexto de aprendizado por reforço (Reinforcement Learning), as variáveis `gamma`, `alpha` e `epsilon` desempenham papéis importantes para o controle do aprendizado do agente. Vamos detalhar cada uma delas:
 
